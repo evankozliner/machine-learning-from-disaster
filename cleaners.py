@@ -1,11 +1,5 @@
 import numpy as np
 import pandas as pd
-
-def example_clean_function():
-    def example_clean(dataframe):
-        print "cleaning..."
-        return dataframe
-    return example_clean
     
 def integer_sex_mapping():
     def integer_sex_mapping(dataframe):
