@@ -1,4 +1,6 @@
 import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
     
 def integer_sex_mapping():
@@ -34,6 +36,7 @@ def clean_missing_ages_with_medians():
 def drop_leftover_features():
     def drop_leftover_features(dataframe):
         dataframe = dataframe.drop(['Name', 'Sex', 'Ticket', 'Cabin', 'PassengerId'], axis=1) 
+        print dataframe.columns.values
         return dataframe
     return drop_leftover_features
 
@@ -47,3 +50,26 @@ def clean_missing_fares_with_medians():
                 dataframe.loc[ (dataframe.Fare.isnull()) & (dataframe.Pclass == f+1 ), 'Fare'] = median_fare[f]
         return dataframe
     return clean_missing_fares_with_medians
+
+def normalize(X):
+    sc = StandardScaler()
+    return pd.DataFrame(sc.fit_transform(X))
+
+def use_only_top_features():
+    def use_only_top_features(dataframe):
+        X_train = dataframe.iloc[:, range(1,8)]
+        X_train_columns = X_train.columns
+        X_train = normalize(X_train)
+        X_train.columns = X_train_columns
+        feat_labels = X_train.columns
+        print feat_labels
+        forest = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+        forest = forest.fit( X_train.values,
+                dataframe.values[0::, 0] )
+        importances = forest.feature_importances_
+        indices = np.argsort(importances)[::-1]
+        for f in range(X_train.shape[1]):
+            print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
+        return dataframe
+    return use_only_top_features
+
